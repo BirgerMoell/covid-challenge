@@ -28,6 +28,7 @@ def load_data(label_file_path, feature_file_path):
             label = 1 if row[1] == 'p' else 0
 
             # load features
+            # hubert, mfcc, mel, smile
             feature = torch.load(feature_file_path + "/" + filename + '.flac.16k.flachubert.pt')
 
             print(feature, label)
@@ -47,3 +48,7 @@ def classify_model(X, y):
     print(clf.predict([[0, 0, 0, 0]]))
 
 load_data(label_file_path, feature_file_path)
+
+
+def evaluate_model(X,y):
+    pass

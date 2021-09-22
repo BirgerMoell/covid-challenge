@@ -2,6 +2,13 @@
 Code for the covid challenge.
 
 
+## Resampling audio
+To resample audio there is a script named resample.sh
+which you need to run in each of the AUDIO folders.
+The script uses sox which you can install for mac
+
+brew install sox
+
 ## To run
 
 Create a new virtual environment
