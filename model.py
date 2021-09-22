@@ -52,6 +52,8 @@ def classify_model(X, y, X_test, y_test):
 
     filename = 'models/random_forest.sav'
     pickle.dump(model, open(filename, 'wb'))
+    import pdb
+    pdb.set_trace()
 
     result = model.score(X_test, y_test)
     print(result)
