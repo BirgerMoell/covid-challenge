@@ -41,21 +41,38 @@ def feature_extractor(path):
             # sample_rate=16000
 
             # mel + mfcc
+            mel_path = audio_file + "mel_spectogram.pt"
+            if os.path.isfile(mel_path):
+                pass
+            else:
+                mel_spectogram = torchaudio.transforms.MelSpectrogram()(waveform)
+                torch.save(mel_spectogram, audio_file + "mel_spectogram.pt")
+            
+            mfcc_path = audio_file + "mfcc.pt"
 
-            mel_spectogram = torchaudio.transforms.MelSpectrogram()(waveform)
-            mfcc = torchaudio.transforms.MFCC()(waveform)
-            torch.save(mel_spectogram, audio_file + "mel_spectogram.pt")
-            torch.save(mfcc, audio_file + "mfcc.pt")
+            if os.path.isfile(mfcc_path):
+                pass
+            else:
+                mfcc = torchaudio.transforms.MFCC()(waveform)
+                torch.save(mfcc, audio_file + "mfcc.pt")
 
             # egemaps
-            ege = smile.process_signal(waveform,sample_rate)
-            print("the ege file is", ege)
-            ege.to_csv(audio_file + "egemaps.csv")
+            ege_path = audio_file + "egemaps.csv"
+            if os.path.isfile(ege_path):
+                pass
+            else:
+                ege = smile.process_signal(waveform,sample_rate)
+                print("the ege file is", ege)
+                ege.to_csv(audio_file + "egemaps.csv")
 
             # wav2vec2 embeddings
-            audio_embeddings = get_audio_embeddings(audio_file)
-            print(audio_embeddings)
-            torch.save(audio_embeddings, audio_file + "hubert.pt")
+            wav2vec2path = audio_file + "hubert.pt"
+            if os.path.isfile(wav2vec2path):
+                pass
+            else:
+                audio_embeddings = get_audio_embeddings(audio_file)
+                print(audio_embeddings)
+                torch.save(audio_embeddings, audio_file + "hubert.pt")
 
 
 
