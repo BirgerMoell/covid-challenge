@@ -6,6 +6,7 @@ import csv
 import os
 import pickle
 import numpy
+import torch.nn.functional as F
 # labels from file
 
 # load a label 
@@ -16,6 +17,8 @@ folders = ["breathing", "cough", "speech"]
 label_file_path = "data/Second_DiCOVA_Challenge_Dev_Data_Release/metadata.csv"
 feature_file_path="data/Second_DiCOVA_Challenge_Dev_Data_Release/AUDIO/breathing"
 
+longest_length = 1501
+
 def load_data(label_file_path, feature_file_path):
     features = []
     labels = []
@@ -23,6 +26,10 @@ def load_data(label_file_path, feature_file_path):
         reader = csv.reader(in_file)
         # skip header
         next(reader)
+
+        longest = 0
+        lengths = []
+
         for row in reader:
 
             #print("the row is", row)
@@ -42,28 +49,30 @@ def load_data(label_file_path, feature_file_path):
             # print("the path is", full_file_path)
             if os.path.isfile(full_file_path):
                 feature = torch.load(feature_file_path + "/" + filename + '.flac.16k.flachubert.pt')
-                # import pdb
-                # pdb.set_trace()
-                print(len(feature[0]))
+                #print(len(feature[0]))
+                padded_feature = padd_feature(feature, len(feature[0]), longest_length)
 
                 # print(feature, label)
-                features.append(feature)
+                features.append(padded_feature)
                 labels.append(label)
+
+
     return [features, labels]
 
-def split_features_into_windows(feature, label):
+def padd_feature(feature, feature_length, max_length):
 
-    # input a feature of variable length
-    
-    # split the feature into windows
-    # return windows and labels
-    # windows = []
-    # labels = []
-    # for i in range(len(feature)):
-    #     windows.append(feature[i])
-    #     labels.append(label[i])
-    # return windows, labels
-    return feature, label
+    padding_length = max_length - feature_length
+    # right, left, top, bottom
+    padded_feature = F.pad(feature, (0, 0, padding_length, 0))
+
+    print(padded_feature)
+
+    if len(padded_feature[0]) != max_length:
+        print("the padded feature is not the same length as the max length")
+
+        print(max_length)
+    else:
+        return padded_feature
 
 
 def classify_model(X, y, X_test, y_test):
@@ -76,14 +85,15 @@ def classify_model(X, y, X_test, y_test):
 
     filename = 'models/random_forest.sav'
     pickle.dump(model, open(filename, 'wb'))
-    import pdb
-    pdb.set_trace()
+  
 
     # X_test = X_test.reshape(-1,1)
     # y_test = y_test.reshape(-1,1)
-    X_test = numpy.array(X_test)
-    y_test = numpy.array(y_test)
-    result = model.score(X_test)
+    # X_test = numpy.array(X_test)
+    # y_test = numpy.array(y_test)
+    result = model.score(X_test, y_test)
+    import pdb
+    pdb.set_trace()
     print(result)
 
 
@@ -96,12 +106,10 @@ def evaluate_model(X_test,y_test, model_path="models/random_forest.sav"):
 full_data = load_data(label_file_path, feature_file_path)
 # print(full_data)
 
-import pdb
-pdb.set_trace()
+
 
 X = full_data[0]
 y = full_data[1]
-
 
 train_size = int(len(y)*0.8)
 test_size = len(y) - train_size
